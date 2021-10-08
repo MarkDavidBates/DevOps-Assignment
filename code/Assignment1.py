@@ -30,12 +30,22 @@ def create_instance():
 						},
 					]
 				},
-			]
+			],
+			UserData="""
+                		#!/bin/bash
+                		echo '<html>' > index.html
+                		echo 'Private IP address: ' >> index.html
+                		curl http://169.254.169.254/latest/meta-data/local-ipv4 >> index.html
+                		cp index.html /var/www/html/index.html""",
 		)
 		new_instance[0].wait_until_running()
 		print ("instance is now up and running")
 		print (new_instance[0].id)
 	except Exception as error:
 		print (error)
+
+def create_bucket():
+	bucket = s3.create_bucket(
+)
 
 create_instance()
