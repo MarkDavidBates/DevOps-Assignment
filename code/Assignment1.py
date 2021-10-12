@@ -41,11 +41,18 @@ def create_instance():
 		new_instance[0].wait_until_running()
 		print ("instance is now up and running")
 		print (new_instance[0].id)
+		print (new_instance[0].public_ip_address)
 	except Exception as error:
 		print (error)
 
 def create_bucket():
-	bucket = s3.create_bucket(
+	new_bucket = s3.create_bucket(
+		ACL="public-read-write"
+		Bucket="MarkBatesAssignment1",
+        	CreateBucketConfiguration={
+            		"LocationConstraint": "eu-west-1"
+        	},
+        	ObjectlockEnablesForBucket=True
 )
 
 create_instance()
