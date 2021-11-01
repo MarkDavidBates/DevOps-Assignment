@@ -7,16 +7,13 @@
 import boto3
 import sys
 import subprocess
-import time
 import webbrowser
 
 print ("""====================================================
 DEVOPS ASSIGNMENT 1 | MARK BATES | APPLIED COMPUTING
 ====================================================""")
 
-#creating instance that will display metadata on the webpage
-#instance is created with the appropriate Security Group, instance Type, etc
-#UserData allows the code to startup and run a website that will display the instance metadata
+#================================ INSTANCE CODE ================================
 def create_instance():
 	ec2 = boto3.resource("ec2")
 	ec2b = boto3.client("ec2")
@@ -92,10 +89,20 @@ def create_instance():
 			webbrowser.open("http://" + ip_address + "/") #import to open up instance in a web browser
 		except Exception as error:
 			print (error)
+			print ("failed to load to webpage. Instance likely does not have the propper security settings or is still pending checks")
 	except Exception as error:
 		print (error)
 
+#	try:
+#		subprocess.run(["scp -i mBatesKey.pem moniter.sh ec2-user@{ip_address}:."], shell=True)
+#		subprocess.run(["sudo ssh -i mBatesKey.pem ec2-user@{ip_address} 'chmod 700 moniter.sh'"], shell=True)
+#		subprocess.run(["sudo ssh -i mBatesKey.pem ec2-user@{ip_address} ./moniter.sh"], shell=True)
+#	except Exception as error:
+#		print (error)
+
 create_instance()
+
+#================================ BUCKET CODE ================================
 
 def create_bucket():
 	s3 = boto3.resource("s3")
@@ -114,6 +121,8 @@ def create_bucket():
 		)
 	except Exception as error:
 		print (error)
+		print ("s3 buckets each have their own unique name, no two can be the same. Be sure that the bucket that is created has a unique and unused name")
+		print ("make sure that the s3 bucket is configured to the appropriate location")
 
 	try:
 		print ("grabbing image URL")
@@ -122,19 +131,21 @@ def create_bucket():
 		s3.meta.client.upload_file("/mnt/c/Users/markb/OneDrive/Desktop/Year3/Semester1/DevOps/image.jpeg", "markbatesassignment1", "image.jpeg") #uploading image to assigned bucket
 	except Exception as error:
 		print (error)
+		print ("failure to get and upload image. Either the webpage or the destination directory is not correct")
 
 	print ("creating index.html file")
-	f = open("index.html", "w") #creating an index.html file to display the image
+	file = open("index.html", "w") #creating an index.html file to display the image
 	message = """<!DOCTYPE html>
 		<html><img src="image.jpeg"></html>"""
-	f.write(message)
-	f.close()
+	file.write(message)
+	file.close()
 
 	try:
 		print ("uploading index.html to bucket")
 		s3.meta.client.upload_file("/mnt/c/Users/markb/OneDrive/Desktop/Year3/Semester1/DevOps/index.html", "markbatesassignment1", "index.html")
 	except Exception as error:
 		print (error)
+		print ("failure to upload file. the path to the directory may be incorrect, or the file does not exist")
 
 	print ("making files public")
 	makeimagepublic = s3b.put_object_acl( #setting the files to public read so they can be visible on the webpage
